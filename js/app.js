@@ -1,6 +1,7 @@
 const carrito = document.querySelector('#carrito');
 const contenedorCarrito = document.querySelector('#lista-carrito tbody');
 const vaciarCarritoBtn = document.querySelector('#vaciar-carrito');
+const numeroCarrito = document.getElementById('numero-carrito');
 const listaCursos = document.querySelector('#lista-cursos');
 let articulosCarritos = [];
 
@@ -16,8 +17,11 @@ function cargarEventListeners() {
     //Vaciar el carrito
     vaciarCarritoBtn.addEventListener('click',() => {
         articulosCarritos = []; //reseteamos el arreglo
-
+        
         limpiarHTML(); //Eliminamos todo el html
+
+        //Actualiza el numero de productos del carrito a cero
+        numeroCarrito.textContent = '0';
     } )
 }
 
@@ -33,17 +37,36 @@ function agregarCurso(e) {
     } 
 }
 
+//Actualiza el numero para el contador
+function actualizarNumeroCarrito() {
+    numeroCarrito.textContent = articulosCarritos.reduce((total, curso) => total + curso.cantidad, 0);
+}
+
 //Elimina un curso del carrito
 function eliminarCurso(e) {
-    if(e.target.classList.contains('borrar-curso')) {
+    if (e.target.classList.contains('borrar-curso')) {
         const cursoId = e.target.getAttribute('data-id');
 
-        //Eliminar del arreglo articulosCarrito por el data-id
-        articulosCarritos = articulosCarritos.filter(curso => curso.id !== cursoId);
+        // Busca el curso a eliminar por su ID
+        const cursoEliminar = articulosCarritos.find(curso => curso.id === cursoId);
 
-        carritoHTML()// Iterar sobre el carrito y mostrar en su html las actualizaciones
+        if (cursoEliminar) {
+            if (cursoEliminar.cantidad > 1) {
+                // Si hay más de uno, simplemente disminuye la cantidad
+                cursoEliminar.cantidad--;
+            } else {
+                // Si solo hay uno, elimina completamente el curso
+                articulosCarritos = articulosCarritos.filter(curso => curso.id !== cursoId);
+            }
+        }
+
+        // Actualizar el número de productos en el carrito
+        actualizarNumeroCarrito();
+
+        carritoHTML();
     }
 }
+
 
 //Lee el contenido del html al que le dimos click y extrae la informacion del curso
 function leerDatosCurso(curso) {
@@ -109,6 +132,12 @@ function carritoHTML() {
         `;
         //Agrega el html del carrito en tbody
         contenedorCarrito.appendChild(row)
+
+        // Actualizar el número de productos en el carrito
+        numeroCarrito.textContent = articulosCarritos.reduce((total, curso) => total + curso.cantidad, 0);
+
+        // Actualizar el número de productos en el carrito a cero
+        actualizarNumeroCarrito();
     });
 }
 
